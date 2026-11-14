@@ -1,9 +1,12 @@
 # RaceProof 🛡️ — Race-Proof Team Formation at Scale
 
 > **Hack4Hack Crew Hiring Challenge 2026 — Problem Statement 1 (PS1)**  
-> Production-grade, ACID-compliant team formation platform engineered to support **10,000 hackathon participants** with **zero race conditions**, sub-100ms discovery latency, and automated lifecycle management.
+> Production-grade, ACID-compliant team formation platform engineered to support **10,000 hackathon participants** with **zero race conditions**, sub-100ms discovery latency, and automated lifecycle management.  
+>  
+> 🌐 **Live Vercel Production URL:** [https://frontend-ivory-one-93.vercel.app](https://frontend-ivory-one-93.vercel.app)
 
 [![CI Status](https://github.com/namangoyal176-10/ps1/actions/workflows/ci.yml/badge.svg)](https://github.com/namangoyal176-10/ps1/actions)
+[![Live on Vercel](https://img.shields.io/badge/Vercel-Live_Deployment-black.svg?logo=vercel)](https://frontend-ivory-one-93.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_16-blue.svg)](https://www.postgresql.org/)
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js_v22-green.svg)](https://nodejs.org/)

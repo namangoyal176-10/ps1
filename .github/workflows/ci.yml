@@ -1,0 +1,83 @@
+name: RaceProof CI - Tests & Concurrency Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-verify:
+    name: Build, Test & Concurrency Verification
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: raceproof_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Setup Prisma Database Schema
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/raceproof_test?schema=public"
+        run: |
+          cd backend
+          npx prisma generate
+          npx prisma db push
+
+      - name: Compile Backend TypeScript
+        run: |
+          cd backend
+          npm run build
+
+      - name: Run API & Concurrency Tests (50 Simultaneous Users)
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/raceproof_test?schema=public"
+          JWT_SECRET: "ci_test_super_secret_jwt_key_hack4hack_2026"
+          NODE_ENV: "test"
+        run: |
+          cd backend
+          npm test
+
+      - name: Verify Concurrency Isolated Test
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/raceproof_test?schema=public"
+          JWT_SECRET: "ci_test_super_secret_jwt_key_hack4hack_2026"
+          NODE_ENV: "test"
+        run: |
+          cd backend
+          npm run test:concurrency
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Frontend Application
+        run: |
+          cd frontend
+          npm run build

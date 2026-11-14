@@ -1,0 +1,169 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum MemberRole {
+  LEADER
+  MEMBER
+}
+
+enum TeamStatus {
+  OPEN
+  FULL
+  LOCKED
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+enum AuditAction {
+  TEAM_CREATED
+  TEAM_UPDATED
+  TEAM_DELETED
+  MEMBER_JOINED
+  MEMBER_LEFT
+  MEMBER_KICKED
+  LEADERSHIP_TRANSFERRED
+  INVITE_CREATED
+  INVITE_ACCEPTED
+  INVITE_REVOKED
+  REQUEST_SENT
+  REQUEST_ACCEPTED
+  REQUEST_DECLINED
+  REQUEST_CANCELLED
+}
+
+model User {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  username       String        @unique
+  passwordHash   String
+  fullName       String
+  avatarUrl      String?
+  bio            String?
+  skills         String[]
+  timezone       String        @default("UTC+0")
+  timezoneOffset Float         @default(0.0) // numeric offset in hours, e.g. -5.0 or 5.5
+  githubUrl      String?
+  portfolioUrl   String?
+  lookingForTeam Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  teamMembership TeamMember?
+  joinRequests   JoinRequest[]
+  sentInvites    TeamInvite[]
+  auditLogs      AuditLog[]
+
+  @@index([lookingForTeam])
+  @@index([timezoneOffset])
+}
+
+model Team {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  description  String
+  track        String        @default("General")
+  skillsNeeded String[]
+  maxMembers   Int           @default(4)
+  status       TeamStatus    @default(OPEN)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  members      TeamMember[]
+  invites      TeamInvite[]
+  joinRequests JoinRequest[]
+  auditLogs    AuditLog[]
+
+  @@index([status])
+  @@index([track])
+  @@index([createdAt])
+}
+
+model TeamMember {
+  id       String     @id @default(uuid())
+  teamId   String
+  userId   String     @unique // Exactly one active team per user
+  role     MemberRole @default(MEMBER)
+  joinedAt DateTime   @default(now())
+
+  team     Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model TeamInvite {
+  id        String    @id @default(uuid())
+  teamId    String
+  code      String    @unique
+  createdBy String
+  maxUses   Int       @default(1)
+  usedCount Int       @default(0)
+  expiresAt DateTime
+  isRevoked Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@index([teamId])
+}
+
+model JoinRequest {
+  id        String        @id @default(uuid())
+  teamId    String
+  userId    String
+  message   String?
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  team      Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([teamId, status])
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  teamId    String?
+  actorId   String?
+  action    AuditAction
+  details   Json?
+  createdAt DateTime    @default(now())
+
+  team      Team?       @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  actor     User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([teamId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model IdempotencyRecord {
+  id           String   @id @default(uuid())
+  key          String   @unique
+  userId       String
+  endpoint     String
+  statusCode   Int
+  responseBody Json
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  @@index([key])
+  @@index([expiresAt])
+}

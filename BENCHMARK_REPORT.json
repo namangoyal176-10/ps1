@@ -1,0 +1,25 @@
+{
+  "testDate": "2026-11-14T18:56:49.993Z",
+  "concurrency": 100,
+  "durationSeconds": 10,
+  "endpoint": "http://localhost:5055/api/v1/teams?page=1&limit=12",
+  "metrics": {
+    "totalRequests": 17876,
+    "requestsPerSecond": 1787.6,
+    "throughputMegabytesPerSecond": 23.54,
+    "latency": {
+      "averageMs": 55.5,
+      "p50Ms": 52,
+      "p90Ms": 68,
+      "p95Ms": 95,
+      "p97_5Ms": 113,
+      "p99Ms": 177,
+      "maxMs": 322
+    },
+    "statusCodes": {
+      "2xx": 17876,
+      "non2xx": 0
+    }
+  },
+  "targetSlaAchieved": true
+}

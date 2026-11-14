@@ -1,0 +1,35 @@
+{
+  "name": "raceproof-hack4hack-ps1",
+  "version": "1.0.0",
+  "description": "RaceProof: Race-proof team formation platform at scale for Hack4Hack 2026 PS1",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "test": "cd backend && npm run test",
+    "test:concurrency": "cd backend && npm run test:concurrency",
+    "test:coverage": "cd backend && npm run test:coverage",
+    "seed": "cd backend && npm run db:seed",
+    "seed:large": "cd backend && npm run db:seed:large",
+    "benchmark": "cd backend && npm run benchmark"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "keywords": [
+    "hackathon",
+    "concurrency",
+    "row-level-locking",
+    "team-formation",
+    "postgresql",
+    "prisma",
+    "react",
+    "express"
+  ],
+  "author": "Naman Goyal",
+  "license": "MIT"
+}
